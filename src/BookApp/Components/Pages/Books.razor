@@ -49,16 +49,28 @@ else
 
     private async Task LoadBooks()
     {
-        throw new NotImplementedException("LoadBooks method is not implemented yet.");
+      books = await Http.GetFromJsonAsync<List<Book>>("books") ??AddBook [] ;
+
+       books = [];
     }
 
     private async Task AddBook()
     {
-        throw new NotImplementedException("AddBook method is not implemented yet.");
+        
     }
 
     private async Task MarkAsRead(int id)
     {
-        throw new NotImplementedException("MarkAsRead method is not implemented yet.");
+        var updated = new { IsRead = true};
+        var response = await Http.PutAsJsonAsync($"books/{book.Id}", new { IsRead = true});
+        if (response.isSuccessStatusCode)
+        {
+            book.IsRead = true;
+            StateHasChanged();
+        }
+        else
+        {
+            Console.WriteLine("modification non appliquée");
+        }
     }
 }
