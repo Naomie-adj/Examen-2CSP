@@ -1,6 +1,8 @@
 @page "/books"
 @inject HttpClient Http
 @using BookApp.Models
+@rendermode InteractiveServer
+@inject NavigationManager Nav
 
 <h3>Ma bibliothèque 📚</h3>
 
@@ -14,7 +16,7 @@ else
         @foreach (var book in books)
         {
             <li>
-                @* <strong>@book.Title</strong> par @book.Author
+                <strong>@book.Title</strong> par @book.Author
                 @if (book.IsRead)
                 {
                     <span style="color: green;"> (lu)</span>
@@ -22,7 +24,7 @@ else
                 else
                 {
                     <button class="btn btn-sm btn-primary" @onclick="() => MarkAsRead(book.Id)">Marquer comme lu</button>
-                } *@
+                }
             </li>
         }
     </ul>
@@ -31,16 +33,15 @@ else
 <hr />
 
 <h4>Ajouter un livre</h4>
-@* <EditForm Model="newBook"
-          OnValidSubmit="AddBook">
+<EditForm Model="newBook" OnValidSubmit="AddBook">
     <InputText @bind-Value="newBook.Title" placeholder="Titre" class="form-control mb-2" />
     <InputText @bind-Value="newBook.Author" placeholder="Auteur" class="form-control mb-2" />
     <button type="submit" class="btn btn-success">Ajouter</button>
-</EditForm> *@
+</EditForm>
 
 @code {
     private List<Book>? books;
-    private Book newBook = new();
+    private Book newBook = new(); // Keep only one declaration of newBook
 
     protected override async Task OnInitializedAsync()
     {
@@ -49,21 +50,40 @@ else
 
     private async Task LoadBooks()
     {
-      books = await Http.GetFromJsonAsync<List<Book>>("books") ??AddBook [] ;
-
-       books = [];
+        try
+        {
+            books = await Http.GetFromJsonAsync<List<Book>>("books") ?? new List<Book>();
+        }
+        catch
+        {
+            Console.WriteLine("Erreur lors de la récupération des livres");
+            books = new List<Book>();
+        }
     }
 
     private async Task AddBook()
     {
-        
+        var response = await Http.PostAsJsonAsync("books", newBook);
+
+        if (response.IsSuccessStatusCode)
+        {
+            newBook = new();
+            Console.WriteLine("Livre ajouté avec succès !");
+        }
+        else
+        {
+            Console.WriteLine("Erreur lors de l'ajout !");
+        }
     }
 
     private async Task MarkAsRead(int id)
     {
-        var updated = new { IsRead = true};
-        var response = await Http.PutAsJsonAsync($"books/{book.Id}", new { IsRead = true});
-        if (response.isSuccessStatusCode)
+        var book = books?.FirstOrDefault(b => b.Id == id);
+        if (book is null) return;
+
+        var response = await Http.PutAsJsonAsync($"books/{id}", new { IsRead = true });
+
+        if (response.IsSuccessStatusCode)
         {
             book.IsRead = true;
             StateHasChanged();

@@ -14,25 +14,22 @@ app.UseHttpsRedirection();
 
 app.MapGet("/", () => "Hello this a bookshop!");
 
-app.MapGet("/books", async (BookDb db) => {
-    await db.Books.ToListAsync();
-});
+app.MapGet("/books", async (BookDb db) => await db.Books.ToListAsync());
+
 
 app.MapPost("/books", async (Book book, BookDb db) => {
-    db.Book.Add(book);
+    db.Books.Add(book);
     await db.SaveChangesAsync();
-    return Results.Created($"/books/{book.Id}", book)
+    return Results.Created($"/books/{book.Id}", book);
 });
 
 app.MapPut("/books/{id}", async (int id, BookDb db) => {
-    var existing = db.Book.Find(id);
+    var existing = await db.Books.FindAsync(id);
     if (existing is null) return Results.NotFound();
 
-    var updatedbook = existing with {IsRead = updatedbook.IsRead };
-    db.Entry(existing).CurrentValues.SetValues(updatedbook);
-    db.SaveChanges();
+    existing.IsRead = true;
+    await db.SaveChangesAsync();
     return Results.NoContent();
-
 });
 
 app.Run();

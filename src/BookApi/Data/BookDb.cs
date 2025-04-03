@@ -7,7 +7,7 @@ public class BookDb : DbContext
 {
     public BookDb(DbContextOptions<BookDb> options) : base(options) { }
 
-    public DbSet<Book> Books => set<Book();
+    public DbSet<Book> Books { get; set; } = null!;
 
     // TODO: Ajouter le DbSet pour les livres
 }
