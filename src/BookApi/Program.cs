@@ -28,9 +28,9 @@ app.MapPut("/books/{id}", async (int id, BookDb db) => {
     var existing = db.Book.Find(id);
     if (existing is null) return Results.NotFound();
 
-    var updatedbook = existing with {IsDone = updatedbook.IsDone };
+    var updatedbook = existing with {IsRead = updatedbook.IsRead };
     db.Entry(existing).CurrentValues.SetValues(updatedbook);
-    db.SveChanges();
+    db.SaveChanges();
     return Results.NoContent();
 
 });
