@@ -12,18 +12,20 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
-app.MapGet("/", () => "Hello World!");
+app.MapGet("/", () => "Hello this a bookshop!");
 
 app.MapGet("/books", async (BookDb db) => {
-    throw new NotImplementedException("This is a test exception.");
+    await db.Books.ToListAsync();
 });
 
 app.MapPost("/books", async (Book book, BookDb db) => {
-    throw new NotImplementedException("This is a test exception.");
+    db.Book.Add(book);
+    await db.SaveChangesAsync();
+    return Results.Created($"/books/{book.Id}", book)
 });
 
 app.MapPut("/books/{id}", async (int id, BookDb db) => {
-    throw new NotImplementedException("This is a test exception.");
+    ;
 });
 
 app.Run();
